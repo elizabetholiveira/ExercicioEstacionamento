@@ -42,6 +42,8 @@ public VisualRetirarCarros() {
                     usuarioService.carroSaiu(id, carroid, hora);
                     usuarioService.atualizarPermanencia(id, usuarioService.calcularPermanencia(id));
                     usuarioService.atualizarValor(id, usuarioService.calcularPermanencia(id));
+                    JOptionPane.showMessageDialog(retirarButton,"Carro saiu do estacionamento com sucesso!");
+                    dispose();
                 } else {
                     JOptionPane.showMessageDialog(retirarButton, "Carro não existe no estacionamento");
                 }

@@ -31,7 +31,7 @@
           </grid>
         </constraints>
         <properties>
-          <text value="0000"/>
+          <text value="(em minutos)"/>
         </properties>
       </component>
       <component id="11d34" class="javax.swing.JButton" binding="atualizarButton" default-binding="true">

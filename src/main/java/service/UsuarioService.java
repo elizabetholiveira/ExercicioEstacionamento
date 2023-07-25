@@ -3,6 +3,10 @@ package service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
+import java.time.Duration;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 import static connection.Conexao.getConnection;
 
@@ -44,7 +48,7 @@ public class UsuarioService {
     }
 
     // Atualizar tempo de permanência
-    public void atualizarPermanencia(long id, int permanencia){
+    public void atualizarPermanencia(long id, long permanencia){
         String sql = "update tb_estacionamento set permanencia = '" + permanencia + "' where id = '" + id + "';";
         try {
             statement.executeUpdate(sql);
@@ -54,27 +58,21 @@ public class UsuarioService {
     }
 
     // Calcular tempo de permanência
-    public int calcularPermanencia(long id){
+    public long calcularPermanencia(long id){
         String sql = "select * from tb_estacionamento where id = '" + id + "';";
-        int permanencia = 0;
+        long permanencia = 0;
         try {
             ResultSet resultSet = statement.executeQuery(sql);
-            int horaEntra = 0;
-            int horaSai = 0;
+            LocalTime horaEntra = null;
+            LocalTime horaSai = null;
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
             while (resultSet.next()){
-                horaEntra = Integer.parseInt(resultSet.getString("entrada"));
-                horaSai = Integer.parseInt(resultSet.getString("saida"));
+                horaEntra = LocalTime.parse(resultSet.getString("entrada"), formatter);
+                horaSai = LocalTime.parse(resultSet.getString("saida"), formatter);
             }
 
-            int horas = (horaSai - (horaSai % 100)) - (horaEntra - (horaEntra % 100));
-            int minutos = (horaSai % 100) - (horaEntra % 100);
-            if (horas == 1 && minutos > 0){
-                permanencia = 60 - minutos;
-            } else if (horas >= 1 && minutos == 0){
-                permanencia = horas * 100;
-            } else if (horas >= 1 && minutos > 0){
-                permanencia = ((horas - 1) * 100) + (60 - minutos);
-            }
+            Duration intervalo = Duration.between(horaEntra, horaSai);
+            permanencia = intervalo.toMinutes() % 60;
 
         } catch (SQLException e){
             e.printStackTrace();
@@ -83,20 +81,20 @@ public class UsuarioService {
     }
 
     // Atualizar o valor a ser pago
-    public void atualizarValor(long id, int permanencia){
+    public void atualizarValor(long id, long permanencia){
         String sql = "select * from tb_estacionamento;";
         try {
             int valor = 10;
-            if (permanencia > 100 && permanencia < 1200){
+            if (permanencia > 60 && permanencia < 720){
                 System.out.println("permanencia inicial: " + permanencia);
-                int subtracao = permanencia;
-                while (subtracao > 100) {
+                long subtracao = permanencia;
+                while (subtracao > 60) {
                     valor += 2;
                     subtracao -= 30;
                     System.out.println("calculo: " + subtracao);
                 }
             }
-            if (permanencia >= 1200){
+            if (permanencia >= 720){
                 valor = 90;
             }
             String sql1 = "update tb_estacionamento set valorpago = '" + valor + "' where id = '" + id + "';";
@@ -204,6 +202,15 @@ public class UsuarioService {
             if (dadoFim % 100 >= 60){
                 dadoFim = -1;
             }
+        }
+        return dadoFim;
+    }
+
+    // Conversor de String para int
+    public int converterStringInt (String dado){
+        int dadoFim = -1;
+        if (dado.matches("[0-9]+") && (dado.length() == 3 || dado.length() == 4)){
+            dadoFim = Integer.parseInt(dado);
         }
         return dadoFim;
     }

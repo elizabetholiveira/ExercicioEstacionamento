@@ -35,7 +35,7 @@ public VisualAtualizarPermanencia() {
         public void actionPerformed(ActionEvent e) {
             long id = usuarioService.converterStringLong(textEstadia.getText());
             if (id > 0 || usuarioService.conferirEstacionamento(id)){
-                int permanencia = usuarioService.converterStringIntHora(textPermanencia.getText());
+                long permanencia = usuarioService.converterStringInt(textPermanencia.getText());
                 if (permanencia > 0) {
                     usuarioService.atualizarPermanencia(id, permanencia);
                     usuarioService.atualizarValor(id, permanencia);
